@@ -1,0 +1,72 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dylib
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+*.manifest
+*.spec
+.cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.pyre/
+.pytype/
+.dmypy.json
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+.ipynb_checkpoints/
+.python-version
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.envrc
+.venv/
+venv/
+python/.venv/
+python/.pytest_cache/
+
+# Project data outputs
+python/data/sessions/
+python/data/reports/
+
+# Arduino build outputs
+*.elf
+*.hex
+*.bin
+*.eep
+*.map
+*.lst
+*.dSYM/
+arduino/**/build*/
+arduino/**/dist*/
+arduino/**/.pio/
+arduino/**/.arduino*
+*.ino.cpp
+
+# OS/Editor backups
+*~
+*.swp
+*.swo

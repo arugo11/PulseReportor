@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=65.5", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hragent"
+version = "0.1.0"
+description = "Heart rate data collector, analyzer, and report agent"
+readme = "README.md"
+authors = [{ name = "Heart Rate Lab" }]
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "heartpy>=1.0",
+  "hrv-analysis>=1.0",
+  "pyserial>=3.5",
+  "pandas>=2.0",
+  "numpy>=1.26",
+  "matplotlib>=3.8",
+  "typer>=0.9",
+  "langchain-core>=1.0",
+  "langchain-openai>=1.0",
+  "langgraph>=1.0",
+  "pydantic>=2.0",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "pytest-mock", "pytest-cov"]
