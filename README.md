@@ -1,31 +1,36 @@
-# Heart Rate Report Agent (Python)
+# Heart Rate Report Agent
 
-このディレクトリには心拍データ収集から解析、レポート生成までを実装したPythonパッケージがあります。
+Pulse Sensor + Arduinoで記録したPPGをPythonで解析し、AIが日本語レポートを生成する一括パイプラインです。ハード（Arduinoスケッチ）とソフト（Python収録/解析/レポート）が疎結合になっています。
 
-## セットアップ
+## 構成
+- `arduino/` : Arduino Uno向けスケッチ。`pulse_logger`がA0を100Hzで読み取り、`<timestamp_ms>,<raw_value>`をシリアル出力。
+- `python/` : 収録・解析・レポート生成。LangGraph + ChatOpenAIで初心者向けの解説付きレポートを生成。
+- `SPEC.md` : 詳細仕様（ハード/ソフト両方）。
 
-1. [`uv`](https://github.com/astral-sh/uv) が利用できるなら `uv sync` で依存を取り込みます。
-2. 使えない場合は通常の仮想環境で `pip install -e .[test]` を実行してください。
-3. `.env.sample` をコピーして `.env` を作成し、`OPENAI_API_KEY` などを設定します（必要に応じて `OPENAI_ORG`/`OPENAI_PROJECT` を追加）。
+## クイックスタート（Python側）
+1. `cd python`
+2. 依存取得: `uv sync`（または `pip install -e .[test]`）
+3. 環境変数: `.env.sample` を `.env` にコピーし、`OPENAI_API_KEY`（必要なら `OPENAI_ORG`/`OPENAI_PROJECT`）と `HRA_SERIAL_PORT` を設定。
+4. 一括実行例（60秒計測）:  
+   `make full PORT=/dev/ttyACM1 SESSION=test6 DURATION=60`
 
-## 主な機能
+## 主な機能（Python）
+- 記録: `python -m hragent.collect`（ポート指定、タイムアウト等も指定可）
+- 一括: `python -m hragent.run_full_session`（記録→解析→レポート）
+- 解析: 0/1023付近のサチュレーション補間、RR 300–2000msの外れ値除去、HeartPy+hrvanalysis
+- レポート: ChatOpenAIを使用し、初心者向けの平易な解説＋「まとめ」セクションを含む。プロットは相対パスで埋め込み。
+- ログ: 記録中10秒ごとにINFOでサンプル数/実効Hzを表示。古いシリアルバッファを破棄し、5秒未満のタイムスタンプから収録開始。範囲外・欠損行・逆行タイムスタンプはスキップ。
 
-- `python -m hragent.collect` で Pulse Sensor からシリアル生データを記録。
-- `python -m hragent.run_full_session` で記録→解析→レポート生成を一括実行。
-- `hragent.analysis`, `hragent.plots` で信号処理とプロットを行い、`hragent.agent` で LangGraph + LangChain を使ったAIレポート。
-- `python/data/sessions` と `python/data/reports` に結果を保存。
-- 10秒ごとに記録進捗（サンプル数/実効Hz）をINFOログで表示。
-- 記録時はシリアルの古いバッファを破棄し、タイムスタンプが5秒未満の行から開始。値の範囲外や欠損行はスキップ。
-- 解析時は0/1023付近に張り付いた区間を補間し、RR間隔を300〜2000msに制限して外れ値を除去。
-- レポートはChatOpenAIを使用し、初心者向けの平易な解説と「まとめ」セクションを含む。
-
-## Makefile（簡易デモ用）
-
+## Makefile（簡易デモ用, `python/`直下で実行）
 - 例: `make full PORT=/dev/ttyACM1 SESSION=test6 DURATION=60`
-- `make collect` 記録のみ、`make report SESSION=...` 既存CSVからレポートのみ、`make monitor` でシリアルモニタ。
-- `PORT` は `HRA_SERIAL_PORT` を拾うか、指定がない場合 `/dev/ttyACM0` を使用。
+- `make collect` 記録のみ / `make report SESSION=...` 既存CSVからレポートのみ / `make monitor` でシリアルモニタ
+- `PORT` は `HRA_SERIAL_PORT` を優先、未指定なら `/dev/ttyACM0`
 
-## テスト
+## Arduino側
+- スケッチ: `arduino/pulse_logger/pulse_logger.ino`（A0, 115200bps, 10ms間隔）。`millis()`ベースの非ブロッキングループ。
+- 接続: `5V/GND/A0` にPulse Sensorを直結。外付けフィルタ等は不要、Python側で処理。
+
+## テスト（Python）
 
 ```bash
 pip install -e .[test]
